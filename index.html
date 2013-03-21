@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Git-ftp by resmo</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Git-ftp</h1>
+        <h2>Git powered FTP client written as shell script.</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/resmo/git-ftp/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/resmo/git-ftp/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/resmo/git-ftp" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>README of git-ftp</h1>
+
+<ul>
+<li>© René Moser, <a href="mailto:mail@renemoser.net">mail@renemoser.net</a>, 2010-2012</li>
+<li>This application is licenced under <a href="http://www.gnu.org/licenses/gpl-3.0-standalone.html">GNU General Public License, Version 3.0</a>
+</li>
+</ul><p>This is free and open source software. If you like and use it, flattr it (<a href="http://en.wikipedia.org/wiki/Flattr">flattr?</a>). Thx.</p>
+
+<p><a href="https://flattr.com/thing/99914/Git-ftp"><img src="http://api.flattr.com/button/button-static-50x60.png" alt=""></a> </p>
+
+<h2>Summary</h2>
+
+<p>Git powered FTP client written as shell script.</p>
+
+<h2>About</h2>
+
+<p>I use git-ftp for my script based projects, mostly PHP. Most of the low-cost
+web hosting companies do not provide SSH or git support, but only FTP.</p>
+
+<p>That is why I needed an easy way to deploy my git tracked projects. Instead of
+transfering the whole project, I thought, why not only transfer the files
+that changed since the last time, git can tell me those files.</p>
+
+<p>Even if you are playing with different branches, git-ftp knows which files
+are different. No ordinary FTP client can do that.</p>
+
+<h2>Known Issues</h2>
+
+<ul>
+<li>See <a href="http://github.com/resmo/git-ftp/issues">git-ftp issues on GitHub</a> for open issues</li>
+</ul><h2>Installing</h2>
+
+<p>See INSTALL file.</p>
+
+<h2>Usage</h2>
+
+<pre><code>$ cd my_git_tracked_project
+$ git ftp push --user &lt;user&gt; --passwd &lt;password&gt; ftp://host.example.com/public_html
+</code></pre>
+
+<p>For interactive password prompt use:</p>
+
+<pre><code>$ git ftp push -u &lt;user&gt; -p - ftp://host.example.com/public_html
+</code></pre>
+
+<p>Pushing for the first time:</p>
+
+<pre><code>$ git ftp init -u &lt;user&gt; -p - ftp://host.example.com/public_html
+</code></pre>
+
+<h2>Using Defaults</h2>
+
+<p>Setting defaults for a git project in .git/config</p>
+
+<pre><code>$ git config git-ftp.user john
+$ git config git-ftp.url ftp.example.com
+$ git config git-ftp.password secr3t
+$ git config git-ftp.cacert caCertStore
+$ git config git-ftp.deployedsha1file mySHA1File
+$ git config git-ftp.syncroot Output
+$ git config git-ftp.insecure 1
+</code></pre>
+
+<p>After setting defaults, push to <code>john@ftp.example.com</code> is as simple as</p>
+
+<pre><code>$ git ftp push
+</code></pre>
+
+<h2>Using Scopes</h2>
+
+<p>For using defaults for different systems, use the so called scope feature.</p>
+
+<pre><code>$ git config git-ftp.&lt;scope&gt;.&lt;(param)&gt; &lt;value&gt;
+with param := {url|user|password|cacert|syncroot|curl-insecure|deployedsha1file}
+</code></pre>
+
+<p>Here I set the params for the scope <code>foobar</code></p>
+
+<pre><code>$ git config git-ftp.foobar.url ftp.testing.com:8080/foobar-path
+$ git config git-ftp.foobar.password simp3l
+</code></pre>
+
+<p>Set scope params using action <code>add-scope</code></p>
+
+<pre><code>$ git ftp add-scope foobar ftp://username:simp3l@ftp.testing.com:8080/foobar-path
+</code></pre>
+
+<p>You can also remove a previously set scope using <code>remove-scope</code></p>
+
+<pre><code>$ git ftp remove-scope foobar
+</code></pre>
+
+<p>Push to scope <code>foobar</code> alias <code>john@ftp.testing.com:8080/foobar-path</code> using password <code>simp3l</code></p>
+
+<pre><code>$ git ftp push -s foobar
+</code></pre>
+
+<p>Because I didn't set the user for this scope, it takes the user <code>john</code> as set before in defaults.</p>
+
+<h2>Ignoring Files to be synced</h2>
+
+<p>Add file names to <code>.git-ftp-ignore</code> to be ignored.</p>
+
+<p>Unlike <code>.gitignore</code>, the pattern matching uses regular expressions (instead of globbing).</p>
+
+<p>Ignoring all in directory <code>config</code>:</p>
+
+<pre><code>config/.*
+</code></pre>
+
+<p>Ignoring all files having extension <code>.txt</code> in <code>./</code> :</p>
+
+<pre><code>.*\.txt
+</code></pre>
+
+<p>This ignores <code>a.txt</code> and <code>b.txt</code> but not <code>dir/c.txt</code></p>
+
+<p>Ignoring a single file called <code>foobar.txt</code>:</p>
+
+<pre><code>foobar\.txt
+</code></pre>
+
+<h2>Testing and Help Manual</h2>
+
+<p>For testing mode use <code>--dry-run</code> alias <code>-D</code></p>
+
+<pre><code>$ git ftp push -u &lt;user&gt; -p --dry-run ftp://host.example.com/public_html
+</code></pre>
+
+<p>For more options and features see man page or help:</p>
+
+<pre><code>$ git ftp help
+</code></pre>
+
+<h2>Unit Tested</h2>
+
+<p>Core functionality is unit tested on Linux using shunit2. You can find the tests in <code>tests/</code>.</p>
+
+<h2>Contributions</h2>
+
+<p>Don't hesitate to use GitHub to improve this tool. Don't forget to add yourself to the AUTHORS file.</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
