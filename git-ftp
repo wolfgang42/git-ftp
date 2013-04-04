@@ -25,6 +25,7 @@ readonly DEFAULT_PROTOCOL="ftp"
 readonly REMOTE_LCK_FILE="$(basename "$0").lck"
 readonly SYSTEM="$(uname)"
 readonly VERSION='0.8.3-snapshot'
+readonly USE_TMP_REPO=y # Create a temporary repository in $GIT_DIR
 
 # ------------------------------------------------------------
 # Defaults
@@ -323,6 +324,7 @@ print_error_and_die() {
 	else
 		write_log "fatal: $1"
 	fi
+	clean_tmp_clone # So that we can start again next time
 	exit $2
 }
 
@@ -834,7 +836,7 @@ remove_scope() {
 action_init() {
 	check_git_version
 	check_is_git_project
-	check_is_dirty_repository
+	ensure_clean_repository
 	set_remotes
 	check_deployed_sha1
 	set_local_sha1
@@ -843,12 +845,13 @@ action_init() {
 	handle_file_sync
 	upload_local_sha1
 	release_remote_lock
+	clean_tmp_clone
 }
 
 action_push() {
 	check_git_version
 	check_is_git_project
-	check_is_dirty_repository
+	ensure_clean_repository
 	set_remotes
 	set_deployed_sha1
 	set_local_sha1
@@ -857,14 +860,16 @@ action_push() {
 	handle_file_sync
 	upload_local_sha1
 	release_remote_lock
+	clean_tmp_clone
 }
 
 action_catchup() {
 	check_is_git_project
-	check_is_dirty_repository
+	ensure_clean_repository
 	set_remotes
 	set_local_sha1
 	upload_local_sha1
+	clean_tmp_clone
 }
 
 action_show() {
@@ -925,8 +930,25 @@ check_is_git_project() {
 	cd "$git_project_dir"
 }
 
-check_is_dirty_repository() {
-	[ $(git status -uno --porcelain | wc -l) -ne 0 ] && print_error_and_die "Dirty repository: Having uncommitted changes. Exiting..." $ERROR_GIT
+ensure_clean_repository() {
+	if [ $USE_TMP_REPO = y ]; then
+		if [ "x$GIT_DIR" = "x" ]; then
+			write_log 'Assuming .git for $GIT_DIR'
+			GIT_DIR='.git'
+		fi
+		write_log "Clone into '$GIT_DIR/git-ftp-tmp'"
+		git clone "$GIT_DIR" "$GIT_DIR/git-ftp-tmp" > /dev/null
+		[ $? -ne 0 ] && print_error_and_die "Couldn't clone temporary repository. Exiting..." $ERROR_GIT
+	else
+		[ $(git status -uno --porcelain | wc -l) -ne 0 ] && print_error_and_die "Dirty repository: Having uncommitted changes. Exiting..." $ERROR_GIT
+	fi
+}
+
+clean_tmp_clone() {
+	if [ $USE_TMP_REPO = y ]; then
+		write_log "Delete temporary clone '$GIT_DIR/git-ftp-tmp'"
+		rm -rf "$GIT_DIR/git-ftp-tmp"
+	fi
 }
 
 # ------------------------------------------------------------
