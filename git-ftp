@@ -836,8 +836,8 @@ remove_scope() {
 action_init() {
 	check_git_version
 	check_is_git_project
-	ensure_clean_repository
 	set_remotes
+	ensure_clean_repository
 	check_deployed_sha1
 	set_local_sha1
 	set_changed_files
@@ -851,8 +851,8 @@ action_init() {
 action_push() {
 	check_git_version
 	check_is_git_project
-	ensure_clean_repository
 	set_remotes
+	ensure_clean_repository
 	set_deployed_sha1
 	set_local_sha1
 	set_changed_files
@@ -865,8 +865,8 @@ action_push() {
 
 action_catchup() {
 	check_is_git_project
-	ensure_clean_repository
 	set_remotes
+	ensure_clean_repository
 	set_local_sha1
 	upload_local_sha1
 	clean_tmp_clone
