@@ -943,10 +943,17 @@ ensure_clean_repository() {
 	else
 		[ $(git status -uno --porcelain | wc -l) -ne 0 ] && print_error_and_die "Dirty repository: Having uncommitted changes. Exiting..." $ERROR_GIT
 	fi
+	switch_branch_and_update
+}
+
+switch_branch_and_update() {
+	git checkout live && git merge master
+	[ $? -ne 0 ] && print_error_and_die "Couldn't update live branch. Exiting..." $ERROR_GIT
 }
 
 clean_tmp_clone() {
 	if [ $USE_TMP_REPO = y ]; then
+		git push origin
 		write_log "Delete temporary clone '$GIT_DIR/git-ftp-tmp'"
 		popd
 		rm -rf "$GIT_DIR/git-ftp-tmp"
